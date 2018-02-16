@@ -1,0 +1,8 @@
+.comment-button {
+    font-size: 24px;
+    color: blueviolet;
+}
+
+.comment-button:hover {
+    color: crimson;
+}

@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
-import { FaCommentO } from 'react-icons/lib/fa';
-
+import {MdComment} from 'react-icons/lib/md';
 import './comment-button.css';
 
 class CommentButton extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            amount: isNaN(this.props.num) || this.props.num === null ? 0 : this.props.num,
         }
     };
 
     render() {
         return (
-            <FaCommentO className={'comment-button'} onClick={this.handleComment('comment')} />
+            <div className={'comment-btn'}>
+                <MdComment /><span>{this.state.amount}</span>
+            </div>
         );
     };
 

@@ -19,7 +19,7 @@ class SocialCard extends Component {
 
   render() {
     return (
-      <div className="container-fluid col-12 col-md-8 col-lg-6 m-auto p-2 border-bottom">
+      <div className="container-fluid col-12 col-md-8 col-lg-6 p-2 border-bottom">
         <ContentBar
           userId={this.state.userName}
           fullName={this.state.fullName}
@@ -27,13 +27,15 @@ class SocialCard extends Component {
           text={this.state.text}
         />
         <ExternalBox input={this.state.externalLink} />
-        <SocialBar />
+        <div className={'col-6 offset-2'}>
+          <SocialBar />
+        </div>
       </div>
     );
   }
 
   giveComment(input) {
-    return function() {
+    return function () {
       console.log(input);
     };
   }

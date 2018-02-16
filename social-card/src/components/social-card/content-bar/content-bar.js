@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { FaUser, FaCaretSquareODown } from 'react-icons/lib/fa';
-
+import { MdAccountCircle } from 'react-icons/lib/md';
 import './content-bar.css';
 
 class ContentBar extends Component {
@@ -16,12 +15,10 @@ class ContentBar extends Component {
 
     render() {
         return (
-            <div className={'container-fluid mb-1'}>
+            <div className={'container-fluid'}>
                 <div className='row'>
-                    <div className='col-2'>
-                        <span onClick={this.handleComment('user')}>
-                            <FaUser size={36} />
-                        </span>
+                    <div className='col-2 d-flex align-items-stretch'>
+                        <MdAccountCircle onClick={this.handleComment('user')} />
                     </div>
                     <div className='col-8 text-left'>
                         <span className={'font-weight-bold'}>{this.state.fullName}</span> <span className={'text-muted'}><a>@{this.state.userId}</a></span> <span className={'text-muted'}>- {this.state.date}</span>
@@ -29,7 +26,7 @@ class ContentBar extends Component {
                     </div>
                     <div className='col-2 d-flex justify-content-end'>
                         <span onClick={this.handleComment('collapse')}>
-                            <FaCaretSquareODown size={18} color={'#888888AA'} />
+                            {/* <FaCaretSquareODown size={16} color={'#888888AA'} /> */}
                         </span>
                     </div>
                 </div>

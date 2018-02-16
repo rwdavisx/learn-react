@@ -1,4 +1,13 @@
-.repost-button {
-    font-size: 24px;
-    color: #009922AA;
+.repost-btn {
+    color: rgb(99, 99, 99);
+    font-size: 20px;
+}
+
+.repost-btn span {
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+.repost-btn:hover {
+    color: rgb(20, 220, 80);
 }

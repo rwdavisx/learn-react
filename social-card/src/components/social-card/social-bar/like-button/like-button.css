@@ -1,4 +1,13 @@
-.like-button {
-    font-size: 24px;
-    color: crimson;
+.like-btn {
+  color: rgb(99, 99, 99);
+  font-size: 20px;
+}
+
+.like-btn span {
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.like-btn:hover {
+  color: rgb(220, 20, 20);
 }

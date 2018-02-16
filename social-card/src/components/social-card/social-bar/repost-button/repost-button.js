@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
-import { FaRepeat } from 'react-icons/lib/fa';
-
+import {MdSync} from 'react-icons/lib/md'
 import './repost-button.css';
 
 class RepostButton extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            amount: isNaN(this.props.num) || this.props.num === null ? 0 : this.props.num,
         }
     };
 
     render() {
         return (
-            <FaRepeat className={'repost-button'} onClick={this.handleComment('repost')} />
+        <div className={'repost-btn'}>
+            <MdSync /><span>{this.state.amount}</span>
+        </div>
         );
     };
 

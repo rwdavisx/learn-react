@@ -14,14 +14,14 @@ class ExternalBox extends Component {
 
     render() {
         return (
-            <div className={'container-fluid m-2'}>
-                <div className="row justify-content-end" id='share'>
-                    <div className='col-10' id='card-link'>
-                        <img className="img-fluid" id='card-link-image' src={this.state.image} alt='' />
-                        <div id='card-link-content'>
-                            <p id='card-link-title'>{this.state.title}</p>
-                            <p id='card-link-info'>{this.state.text}</p>
-                            <p id='card-link-source'><a href={this.state.link}>{this.state.link}</a></p>
+            <div className={'container-fluid mb-1'}>
+                <div className="row justify-content-end">
+                    <div className='col-10'>
+                        <img className="img-fluid rounded-top" src={this.state.image} alt='' />
+                        <div className={'text-left border rounded-bottom p-2 bg-light'}>
+                            <p className={'font-weight-bold m-0'}>{this.state.title}</p>
+                            <p className={'mb-1'}>{this.state.text}</p>
+                            <p className={'font-weight-light m-0'}><a href={this.state.link}>{this.state.link}</a></p>
                         </div>
                     </div>
                 </div>

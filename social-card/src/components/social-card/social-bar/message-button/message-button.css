@@ -1,4 +1,8 @@
-.message-button {
-    font-size: 24px;
-    color: cadetblue;
+.message-btn {
+    color: rgb(99, 99, 99);
+    font-size: 20px;
+}
+
+.message-btn:hover {
+    color: rgb(223, 0, 0);
 }

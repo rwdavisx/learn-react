@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { FaEnvelope } from 'react-icons/lib/fa';
-
+import {MdEmail} from 'react-icons/lib/md';
 import './message-button.css';
 
 class MessageButton extends Component {
@@ -12,7 +11,9 @@ class MessageButton extends Component {
 
     render() {
         return (
-            <FaEnvelope className={'message-button'} onClick={this.handleComment('message')} />
+        <div className={'message-btn'}>
+            <MdEmail />
+        </div>
         );
     };
 

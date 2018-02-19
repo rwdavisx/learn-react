@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import SocialCard from './components/social-card/social-card';
-import { Card2 } from './db/sample-card';
+import { Card1, Card2 } from './db/sample-card';
 
 class App extends Component {
   render() {
@@ -14,11 +14,11 @@ class App extends Component {
           <h1 className="App-title">Welcome to SocialCard!</h1>
         </header>
         <SocialCard
-          userName={Card2.userName}
-          fullName={Card2.fullName}
-          date={Card2.date}
-          text={Card2.text}
-          externalLink={Card2.externalLink}
+          userName={Card1.userName}
+          fullName={Card1.fullName}
+          date={Card1.date}
+          text={Card1.text}
+          externalLink={Card1.externalLink}
         />
         <SocialCard
         userName={Card2.userName}

@@ -17,8 +17,8 @@ class ContentBar extends Component {
         return (
             <div className={'container-fluid'}>
                 <div className='row'>
-                    <div className='col-2 d-flex align-items-stretch'>
-                        <MdAccountCircle onClick={this.handleComment('user')} />
+                    <div className='col-2'>
+                        <MdAccountCircle className={'profile-pic w-100'} onClick={this.handleComment('user')} />
                     </div>
                     <div className='col-8 text-left'>
                         <span className={'font-weight-bold'}>{this.state.fullName}</span> <span className={'text-muted'}><a>@{this.state.userId}</a></span> <span className={'text-muted'}>- {this.state.date}</span>

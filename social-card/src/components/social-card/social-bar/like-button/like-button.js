@@ -12,14 +12,15 @@ class LikeButton extends Component {
 
     render() {
         return (
-            <div className={'like-btn'}>
-                <MdFavorite onClick={() => this.handleLike()}/><span>{this.state.amount}</span>
+            <div className={'like-btn'} onClick={() => this.handleLike()}>
+                <MdFavorite /><span>{this.state.amount}</span>
             </div>
         );
     };
 
     handleLike() {
-        this.setState({amount: this.state.amount += 1});
+        let amt = this.state.amount;
+        this.setState({amount: amt += 1});
     };
 };
 

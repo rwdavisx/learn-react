@@ -12,14 +12,15 @@ class CommentButton extends Component {
 
     render() {
         return (
-            <div className={'comment-btn'}>
+            <div className={'comment-btn'} onClick={() => this.handleComment()}>
                 <MdComment /><span>{this.state.amount}</span>
             </div>
         );
     };
 
     handleComment(input) {
-        console.log(input);
+        let amt = this.state.amount;
+        this.setState({amount: amt += 1});
     };
 };
 

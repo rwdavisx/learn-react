@@ -19,16 +19,33 @@ class SocialCard extends Component {
 
   render() {
     return (
-      <div className="container-fluid col-12 col-md-8 col-lg-6 p-2 border-bottom">
-        <ContentBar
-          userId={this.state.userName}
-          fullName={this.state.fullName}
-          date={this.state.date}
-          text={this.state.text}
-        />
-        <ExternalBox input={this.state.externalLink} />
-        <div className={'col-6 offset-2'}>
-          <SocialBar />
+      <div className="container-fluid p-2 border-bottom">
+        <div className={'row justify-content-center'}>
+          <div className={'col-xl-6 col-lg-10 col-md-12 col-sm-10 col-xs-12'}>
+            <div className={'container-fluid'}>
+              <div className={'row justify-content-center'}>
+                <div className={'col-12'}>
+                  <ContentBar
+                    userId={this.state.userName}
+                    fullName={this.state.fullName}
+                    date={this.state.date}
+                    text={this.state.text} />
+                </div>
+              </div>
+              <div className={'row'}>
+                <div className={'col-10 offset-2'}>
+                  <ExternalBox
+                    input={this.state.externalLink} />
+                </div>
+              </div>
+
+              <div className={'row'}>
+                <div className={'col-6 offset-2'}>
+                  <SocialBar />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

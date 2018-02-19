@@ -12,14 +12,15 @@ class RepostButton extends Component {
 
     render() {
         return (
-        <div className={'repost-btn'}>
+        <div className={'repost-btn'} onClick={() => this.handleRepost()}>
             <MdSync /><span>{this.state.amount}</span>
         </div>
         );
     };
 
-    handleComment(input) {
-        console.log(input);
+    handleRepost() {
+        let amt = this.state.amount;
+        this.setState({amount: amt += 1});
     };
 };
 

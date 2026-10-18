@@ -1,7 +1,7 @@
 """Synthesize the 'BT Goes Viral' intro soundtrack (48 kHz stereo WAV).
 
 Timeline (s): 0.3 ECG beep | 0.3-2.8 heartbeat + drone + riser | 2.8 impact, beat drops,
-2.8-8.8 driving beat under the clip (Am-F-G-E) | 8.8 logo impact | 10.8 subscribe click/ding | 12.8 end.
+2.8-8.8 driving beat under the clip (Am-F-G-E) | 8.8 logo impact + braam | 10.8 final hit | 12.8 end.
 """
 import sys, wave
 import numpy as np
@@ -138,23 +138,6 @@ def bass_note(f, dur):
     return lp(np.tanh(x * 1.5), 520 + 900 * np.exp(-t * 18)) * env
 
 
-_pluck_cache = {}
-
-
-def pluck(f, dur=0.22):
-    if (f, dur) not in _pluck_cache:
-        _pluck_cache[(f, dur)] = _pluck(f, dur)
-    return _pluck_cache[(f, dur)]
-
-
-def _pluck(f, dur=0.22):
-    t = t_arr(dur)
-    ph = (f * t) % 1.0
-    x = np.where(ph < 0.32, 1.0, -1.0) + 0.5 * saw(f * 2.003, t)
-    env = np.minimum(1, t / 0.003) * np.exp(-t * 16)
-    return lp(x * env, 2600 + 2500 * np.exp(-t * 25)) * 0.5
-
-
 def pad(freqs, dur, attack=0.6, release=0.8, cutoff=1400):
     t = t_arr(dur)
     x = np.zeros((len(t), 2))
@@ -224,89 +207,104 @@ def glitch(dur=0.22):
     return x * np.exp(-t * 6) * 0.25
 
 
-def bell(f, dur=1.6):
+def braam(freqs, dur, attack=0.05):
+    """Gritty brass-like swell: detuned saw stack, filter opens then closes, saturated."""
     t = t_arr(dur)
-    x = sum(a * np.sin(2 * np.pi * f * r * t) * np.exp(-t * d)
-            for r, a, d in ((1, 1, 3.0), (2.76, 0.45, 5), (5.4, 0.25, 8), (8.93, 0.12, 12)))
-    return x * np.minimum(1, t / 0.002) * 0.35
+    x = np.zeros(len(t))
+    for f in freqs:
+        for det in (-0.012, -0.004, 0.005, 0.013):
+            x += saw(f, t, det)
+    x /= len(freqs) * 4
+    x = tv_lp(x, 160 + 2400 * np.exp(-t * 1.8) * np.minimum(1, t / 0.08))
+    x = np.tanh(x * 4.0) * 0.8
+    env = np.minimum(1, t / attack) * np.exp(-t * 0.8) * np.clip((dur - t) / 0.5, 0, 1)
+    return reverb(x * env, wet=0.3, dur=2.5, decay=0.9)
 
 
-def mouse_click():
-    t = t_arr(0.03)
-    return hp(rng.standard_normal(len(t)), 3000) * np.exp(-t * 300) * 0.5
+def tom(f=95, dur=0.6):
+    t = t_arr(dur)
+    ff = f * (1 + 0.6 * np.exp(-t * 20))
+    body = np.sin(2 * np.pi * np.cumsum(ff) / SR) * np.exp(-t * 6)
+    skin = lp(rng.standard_normal(len(t)), 1500) * np.exp(-t * 30) * 0.4
+    return np.tanh((body + skin) * 1.5) * 0.8
+
+
+_stab_cache = {}
+
+
+def stab(f, dur=0.14):
+    """Short dark saw stab for the 16th-note ostinato."""
+    if (f, dur) not in _stab_cache:
+        t = t_arr(dur)
+        x = 0.5 * saw(f, t) + 0.5 * saw(f, t, 0.007)
+        env = np.minimum(1, t / 0.003) * np.exp(-t * 22)
+        _stab_cache[(f, dur)] = lp(x * env, 900) * 0.6
+    return _stab_cache[(f, dur)]
 
 
 # ---------------------------------------------------------------- arrangement
 NOTE = {"A1": 55.0, "E1": 41.2, "F1": 43.65, "G1": 49.0, "A2": 110.0, "F2": 87.31, "G2": 98.0, "E2": 82.41,
         "C3": 130.81, "D3": 146.83, "E3": 164.81, "G#3": 207.65, "A3": 220.0, "B3": 246.94, "C4": 261.63,
-        "A4": 440.0, "B4": 493.88, "C5": 523.25, "D5": 587.33, "E5": 659.25, "F5": 698.46, "G5": 783.99,
-        "G#4": 415.30, "G#5": 830.61, "A5": 880.0, "B5": 987.77, "F4": 349.23, "G4": 392.0, "E4": 329.63, "D4": 293.66}
+        "F3": 174.61, "G3": 196.0, "E4": 329.63, "D4": 293.66}
 
-# --- Opener: ECG beeps + heartbeat + drone + riser
-place("fx", 0.30, reverb(beep(1000), 0.3, dur=1.0, decay=0.3), 0.55)
+# --- Opener: ECG beep + heartbeat + low drone + riser, toms building into the drop
+place("fx", 0.30, reverb(beep(1000), 0.3, dur=1.0, decay=0.3), 0.5)
 for i, tb in enumerate(np.arange(GRID0, T_DROP - 0.01, BEAT)):
-    place("drums", tb, heartbeat(0.55 + 0.45 * i / 5), 1.0)
-place("synth", 0.15, pad([NOTE["A1"] * 2, NOTE["E2"] * 2 * 1.0, NOTE["A2"] * 2], T_DROP - 0.15 + 0.4,
-                          attack=1.2, release=0.4, cutoff=700), 1.1)
-place("fx", 0.42, whoosh(0.5), 0.22)
-place("fx", 1.52, whoosh(0.5), 0.22)
-place("fx", T_DROP - 1.5, riser(1.5), 0.55)
-# snare roll accelerating into the drop
-for tt in np.concatenate([np.arange(1.8, 2.3, 0.125), np.arange(2.3, 2.8, 0.0625)]):
-    place("drums", tt, snare(), 0.10 + 0.32 * (tt - 1.8))
+    place("drums", tb, heartbeat(0.6 + 0.4 * i / 5), 1.0)
+place("synth", 0.15, pad([NOTE["A1"], NOTE["E2"], NOTE["A2"]], T_DROP - 0.15 + 0.4,
+                          attack=1.2, release=0.4, cutoff=500), 1.4)
+place("fx", 0.42, whoosh(0.5), 0.2)
+place("fx", 1.52, whoosh(0.5), 0.2)
+place("fx", T_DROP - 1.5, riser(1.5), 0.5)
+for k, tt in enumerate(np.concatenate([np.arange(1.8, 2.3, 0.25), np.arange(2.3, 2.8, 0.125)])):
+    place("drums", tt, tom(110 if k % 2 else 82), 0.25 + 0.5 * (tt - 1.8), pan=(-0.3 if k % 2 else 0.3))
 
-# --- Drop: impact + glitch, then driving beat under the clip
+# --- Drop: impact + braam, then a driving beat under the clip
 place("fx", T_DROP, impact(1.0), 0.55)
-place("fx", T_DROP, glitch(0.25), 0.6, pan=0.3)
-CHORDS = [  # (start, dur, bass root, arp tones, pad tones)
-    (2.8, 2.0, "A2", ["A4", "C5", "E5", "A5"], ["A3", "C4", "E4"]),
-    (4.8, 2.0, "F2", ["F4", "A4", "C5", "F5"], ["F4", "A3", "C4"]),
-    (6.8, 1.0, "G2", ["G4", "B4", "D5", "G5"], ["G4", "B3", "D4"]),
-    (7.8, 1.0, "E2", ["E4", "G#4", "B4", "E5"], ["E4", "G#3", "B3"]),
-    (8.8, 2.0, "A2", ["A4", "C5", "E5", "A5"], ["A3", "C4", "E4"]),
+place("synth", T_DROP, braam([NOTE["A1"], NOTE["E2"], NOTE["A2"]], 1.6), 0.55)
+place("fx", T_DROP, glitch(0.2), 0.4, pan=0.3)
+CHORDS = [  # (start, dur, bass root, pad tones)
+    (2.8, 2.0, "A2", ["A2", "E3", "A3", "C4"]),
+    (4.8, 2.0, "F2", ["F2", "C3", "F3", "A3"]),
+    (6.8, 1.0, "G2", ["G2", "D3", "G3", "B3"]),
+    (7.8, 1.0, "E2", ["E2", "B3", "E3", "G#3"]),
+    (8.8, 2.0, "A2", ["A2", "E3", "A3", "C4"]),
 ]
-for start, dur, root, arp, padn in CHORDS:
+for start, dur, root, padn in CHORDS:
     end = start + dur
-    fade = 1.0
     for k, tt in enumerate(np.arange(start, end - 1e-6, 0.25)):   # driving 8th-note bass
         place("bass", tt, bass_note(NOTE[root], 0.24), 0.55 if k % 2 == 0 else 0.42)
-    pattern = [0, 1, 2, 3, 2, 1, 2, 3]
-    for k, tt in enumerate(np.arange(start, end - 1e-6, 0.125)):  # 16th arp, ping-pong
-        f = NOTE[arp[pattern[k % 8]]]
-        place("synth", tt, pluck(f), 0.20, pan=(-0.45 if k % 2 else 0.45))
-        place("synth", tt + 0.375, pluck(f), 0.07, pan=(0.6 if k % 2 else -0.6))
-    place("synth", start, pad([NOTE[n] for n in padn], dur + 0.3, attack=0.15, release=0.3, cutoff=1800), 0.35)
+    pattern = [1, 1, 2, 1, 1, 2, 1, 2]                              # low root/octave ostinato
+    for k, tt in enumerate(np.arange(start, end - 1e-6, 0.125)):
+        place("synth", tt, stab(NOTE[root] * pattern[k % 8]), 0.32, pan=(-0.25 if k % 2 else 0.25))
+    place("synth", start, pad([NOTE[n] for n in padn], dur + 0.3, attack=0.15, release=0.3, cutoff=1000), 0.3)
 
 for tb in np.arange(T_DROP, T_SUB - 1e-6, BEAT):           # kick on every beat
-    place("drums", tb, kick(), 0.85)
+    place("drums", tb, kick(), 0.9)
 for tb in np.arange(T_DROP + BEAT, T_SUB - 1e-6, 2 * BEAT):  # backbeat
-    place("drums", tb, reverb(snare(), 0.2, dur=0.8, decay=0.25), 0.55)
-for k, tt in enumerate(np.arange(T_DROP, T_SUB - 1e-6, 0.125)):  # hats
-    place("drums", tt, hat(open_=(k % 4 == 2)), 0.30 if k % 2 else 0.18, pan=0.25)
-# fill + riser into the logo
-for tt in np.arange(8.3, 8.8, 0.0625):
-    place("drums", tt, snare(), 0.15 + 0.5 * (tt - 8.3))
-place("fx", 8.0, riser(0.8), 0.45)
-place("fx", 8.55, whoosh(0.3), 0.2)
+    place("drums", tb, reverb(snare(), 0.25, dur=0.9, decay=0.3), 0.55)
+for k, tt in enumerate(np.arange(T_DROP, T_SUB - 1e-6, 0.25)):  # 8th hats, kept low
+    place("drums", tt, hat(), 0.16 if k % 2 else 0.1, pan=0.25)
+# tom fill + riser into the logo
+for k, tt in enumerate(np.arange(8.3, 8.8, 0.125)):
+    place("drums", tt, tom([120, 100, 85, 70][k % 4]), 0.5 + 0.4 * (tt - 8.3), pan=(-0.3 if k % 2 else 0.3))
+place("fx", 8.0, riser(0.8), 0.4)
+place("fx", 8.55, whoosh(0.3), 0.18)
 
-# HUD typewriter ticks (match visual timings)
-for t0, nchar, dt in ((3.0, 18, 0.014), (3.7, 36, 0.018), (4.5, 32, 0.018), (5.3, 32, 0.018), (6.1, 27, 0.018)):
+# HUD typewriter ticks (match the text timings in render.py)
+for t0, nchar, dt in ((3.0, 18, 0.014), (3.7, 14, 0.018), (4.5, 25, 0.018), (5.3, 39, 0.018), (6.1, 16, 0.018)):
     for c in range(nchar):
         place("fx", t0 + c * dt, tick(), 0.12, pan=0.5)
 
-# --- Logo: big impact + chord, subscribe click + ding, ring out
+# --- Logo: big impact + long braam, final hit as the subscribe button lands, ring out
 place("fx", T_LOGO, impact(1.15), 0.6)
-place("fx", T_LOGO, glitch(0.18), 0.45, pan=-0.3)
-place("synth", T_LOGO, pad([NOTE["A2"], NOTE["E3"], NOTE["A3"], NOTE["C4"], NOTE["E4"], NOTE["B4"]], T_END - T_LOGO,
-                            attack=0.02, release=2.6, cutoff=2400), 0.75)
-for f, d in ((NOTE["A4"], 0.0), (NOTE["E5"], 0.0), (NOTE["A5"], 0.0)):
-    place("synth", T_LOGO + d, reverb(bell(f, 2.5), 0.4, dur=2.5, decay=0.9), 0.35)
-place("fx", 9.9, whoosh(0.4), 0.18)      # subscribe button slides in
-place("fx", T_SUB, mouse_click(), 0.8)
-place("fx", T_SUB + 0.02, reverb(bell(NOTE["E5"] * 2, 1.2), 0.3), 0.40)
-place("fx", T_SUB + 0.25, reverb(bell(NOTE["A5"] * 2, 1.4), 0.3), 0.33)   # bell notification ding
-place("drums", T_SUB, kick(f_hi=120, f_lo=40), 0.8)
-place("fx", T_SUB, reverb(np.concatenate([np.zeros(10), glitch(0.12)]), 0.4), 0.25)
+place("synth", T_LOGO, braam([NOTE["A1"], NOTE["E2"], NOTE["A2"], NOTE["C3"]], T_END - T_LOGO), 0.7)
+place("fx", T_LOGO, glitch(0.15), 0.3, pan=-0.3)
+place("synth", T_LOGO, pad([NOTE["A2"], NOTE["E3"], NOTE["A3"], NOTE["C4"]], T_END - T_LOGO,
+                            attack=0.3, release=2.6, cutoff=1100), 0.4)
+place("drums", T_SUB, kick(f_hi=120, f_lo=40), 0.9)
+place("fx", T_SUB, impact(0.7), 0.3)
+place("drums", T_SUB, tom(70, 1.0), 0.6)
 
 # --- Voice: original clip audio, placed under the drop
 w = wave.open(sys.argv[1])

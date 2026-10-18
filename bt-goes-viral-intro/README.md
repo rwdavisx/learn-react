@@ -9,11 +9,13 @@ Channel intro for **BT Goes Viral**, the channel of Dr. Bill Timm, an infectious
 
 | Time | Scene |
 |---|---|
-| 0.0–2.8 s | Cold open: an ECG heartbeat line, then a dotted world map where flight paths spread an "outbreak" city to city. Trailer text reads *"In a world where viruses travel… one doctor travels faster."* |
-| 2.8–8.8 s | The Grok clip plays in a "field cam" HUD panel. **DR. BILL TIMM / Infectious Disease Physician** is typed out next to it, along with joke readouts (specialty, side effect, passport, status) and a "virality level" meter that fills to critical. |
-| 8.8–12.8 s | Logo reveal: a virus-globe emblem with an orbiting plane, the **BT GOES VIRAL** wordmark, a tagline, and an animated subscribe button with a bell. |
+| 0.0–2.8 s | Cold open: a red ECG heartbeat line, then a dark dotted world map where flight paths spread a red "outbreak" city to city. Trailer text reads *"In a world where viruses travel… one doctor travels faster."* |
+| 2.8–8.8 s | The Grok clip plays in a "field cam" HUD panel. **DR. BILL TIMM / Infectious Disease Physician** appears next to it, followed by a dossier (callsign, field of ops, targets, status) and a "threat level" meter that fills to critical. |
+| 8.8–12.8 s | Logo reveal: a targeting reticle locks onto a wireframe globe, then the **BT GOES VIRAL** wordmark, a tagline and a subscribe button that lands on the final hit. |
 
-The soundtrack is synthesized from scratch (no licensed music): heartbeat, riser, impacts, a driving beat, a typewriter tick for each typed character, and a subscribe "ding". Bill's audio from the clip sits under the music during the clip scene.
+Look: charcoal and steel with a blood-red accent, styled as an action-movie trailer.
+
+The soundtrack is synthesized from scratch (no licensed music): heartbeat, low toms, brass-style "braam" hits, impacts, a driving beat with a low ostinato, and a typewriter tick for each typed character. Bill's audio from the clip sits under the music during the clip scene.
 
 ## Rebuild
 

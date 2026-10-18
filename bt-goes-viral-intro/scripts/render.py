@@ -35,14 +35,14 @@ FONTS = {
     "mono": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
 }
 
-NAVY0 = (5, 8, 17)
-NAVY1 = (13, 27, 50)
-LIME = (184, 255, 61)
-CYAN = (110, 220, 255)
+NAVY0 = (5, 6, 8)
+NAVY1 = (24, 26, 31)
+ACCENT = (232, 28, 40)
+STEEL = (196, 202, 212)
 WHITE = (242, 247, 255)
 RED = (255, 38, 72)
 YT_RED = (255, 0, 51)
-DOT = (58, 92, 128)
+DOT = (64, 68, 76)
 
 
 # ------------------------------------------------------------------ math helpers
@@ -72,11 +72,6 @@ def e_inout(x):
 
 def e_in3(x):
     return x ** 3
-
-
-def e_outback(x, s=1.9):
-    x -= 1
-    return 1 + (s + 1) * x ** 3 + s * x ** 2
 
 
 def mixc(c1, c2, x):
@@ -334,7 +329,7 @@ def draw_map(buf, t, alpha):
     zz = z ** 0.7
     for x, y, vv in zip(X[vis] * 2, Y[vis] * 2, v[vis]):
         rr = (1.9 + 1.0 * vv) * zz * 2
-        d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=rgba(mixc(DOT, LIME, vv), (0.42 + 0.5 * vv) * alpha))
+        d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=rgba(mixc(DOT, ACCENT, vv), (0.42 + 0.5 * vv) * alpha))
     comp(buf, L.reduce(2))
 
     A = ss_layer()
@@ -349,7 +344,7 @@ def draw_map(buf, t, alpha):
         seg = pts[:m] * 2
         for k in range(m - 1):
             moving = 0.25 + 0.75 * (k / max(1, m - 2))
-            da.line([tuple(seg[k]), tuple(seg[k + 1])], fill=rgba(CYAN, lerp(moving, 0.28, settle) * alpha), width=4)
+            da.line([tuple(seg[k]), tuple(seg[k + 1])], fill=rgba(STEEL, lerp(moving, 0.28, settle) * alpha), width=3)
         if p < 1:
             hx, hy = seg[-1]
             da.ellipse((hx - 8, hy - 8, hx + 8, hy + 8), fill=rgba(WHITE, alpha))
@@ -360,12 +355,12 @@ def draw_map(buf, t, alpha):
         q = prog(t, ta, ta + 0.85)
         if q < 1:
             r = (10 + 85 * e_out3(q)) * 2
-            da.ellipse((x - r, y - r, x + r, y + r), outline=rgba(LIME, (1 - q) * alpha), width=5)
+            da.ellipse((x - r, y - r, x + r, y + r), outline=rgba(ACCENT, (1 - q) * alpha), width=5)
         r = 11
-        da.ellipse((x - r, y - r, x + r, y + r), fill=rgba(LIME, alpha))
+        da.ellipse((x - r, y - r, x + r, y + r), fill=rgba(ACCENT, alpha))
     A = A.reduce(2)
     comp(buf, A)
-    glow(buf, A, 14, 1.3)
+    glow(buf, A, 14, 0.6)
 
 
 def latest_city(t):
@@ -398,13 +393,13 @@ def draw_ecg(buf, t):
     ys = ecg_y(xs)
     for k in range(len(xs) - 1):
         a = clamp01(1 - (head - xs[k]) / 1500) * fade
-        d.line([(xs[k] * 2, ys[k] * 2), (xs[k + 1] * 2, ys[k + 1] * 2)], fill=rgba(LIME, a), width=6)
+        d.line([(xs[k] * 2, ys[k] * 2), (xs[k + 1] * 2, ys[k + 1] * 2)], fill=rgba(ACCENT, a), width=6)
     if head < W:
         hy = ecg_y(np.array([head]))[0]
         d.ellipse((head * 2 - 12, hy * 2 - 12, head * 2 + 12, hy * 2 + 12), fill=rgba(WHITE, fade))
     L = L.reduce(2)
     comp(buf, L)
-    glow(buf, L, 18, 1.8)
+    glow(buf, L, 18, 0.9)
 
 
 def corner_brackets(d, x0, y0, x1, y1, size, color, width):
@@ -420,18 +415,18 @@ def draw_opener_hud(buf, t):
     d = ImageDraw.Draw(L)
     corner_brackets(d, 36, 36, W - 36, H - 36, 34, rgba(WHITE, 0.45 * a), 2)
     blink = 1.0 if (t * 3) % 1 < 0.6 else 0.25
-    d.rectangle((64, 58, 76, 70), fill=rgba(LIME, a * blink))
+    d.rectangle((64, 58, 76, 70), fill=rgba(ACCENT, a * blink))
     draw_text(L, "GLOBAL TRANSMISSION MAP", "mono", 20, WHITE, 90, 71, tracking=4, alpha=0.8 * a)
     cases = int(round(10 ** (6.5 * e_inout(prog(t, 0.55, 2.75)))))
-    draw_text(L, f"{cases:,}".rjust(9), "mono", 26, LIME, W - 64, 73, align="r", alpha=a)
+    draw_text(L, f"{cases:,}".rjust(9), "mono", 26, ACCENT, W - 64, 73, align="r", alpha=a)
     draw_text(L, "CASES", "mono", 20, WHITE, W - 64 - text_w(f"{cases:,}".rjust(9), "mono", 26) - 16, 71,
               tracking=4, align="r", alpha=0.7 * a)
     c = latest_city(t)
     if c:
         draw_text(L, "LAST CONTACT:", "mono", 20, WHITE, 64, H - 58, tracking=3, alpha=0.7 * a)
-        draw_text(L, CITIES[c][2], "mono", 20, LIME, 64 + text_w("LAST CONTACT:", "mono", 20, 3) + 14, H - 58,
+        draw_text(L, CITIES[c][2], "mono", 20, ACCENT, 64 + text_w("LAST CONTACT:", "mono", 20, 3) + 14, H - 58,
                   tracking=3, alpha=a)
-    draw_text(L, "STRAIN BT-26 // WANDERLUST", "mono", 20, WHITE, W - 64, H - 58, tracking=3, align="r", alpha=0.7 * a)
+    draw_text(L, "STRAIN BT-26 // UNCONTAINED", "mono", 20, WHITE, W - 64, H - 58, tracking=3, align="r", alpha=0.7 * a)
     comp(buf, L)
 
 
@@ -445,14 +440,14 @@ def draw_card(buf, t, small, big_words, big_colors, t_in, t_out, size=128):
     n = len(small)
     k = int(round(n * prog(t, t_in, t_in + 0.22)))
     sw = text_w(small, "mono", 34, 10)
-    draw_text(L, small[:k], "mono", 34, LIME, W / 2 - sw / 2, 452 + dy, tracking=10, alpha=alpha)
+    draw_text(L, small[:k], "mono", 34, ACCENT, W / 2 - sw / 2, 452 + dy, tracking=10, alpha=alpha)
     bw = words_width(big_words, "black", size)
     T = new_layer()
     reveal_words(T, big_words, "black", size, big_colors, W / 2 - bw / 2, 600, t, t_in + 0.1, alpha=alpha)
     comp(buf, L)
-    glow(buf, L, 10, 0.6)
+    glow(buf, L, 10, 0.25)
     comp(buf, T, y=int(dy))
-    glow(buf, T, 24, 0.35, y=int(dy))
+    glow(buf, T, 24, 0.1, y=int(dy))
 
 
 def render_opener(buf, t):
@@ -465,64 +460,17 @@ def render_opener(buf, t):
     draw_ecg(buf, t)
     draw_opener_hud(buf, t)
     draw_card(buf, t, "IN A WORLD WHERE", ["VIRUSES", "TRAVEL..."], [WHITE, WHITE], 0.5, 1.42)
-    draw_card(buf, t, "ONE DOCTOR", ["TRAVELS", "FASTER."], [WHITE, LIME], 1.58, 2.9)
-
-
-# ------------------------------------------------------------------ virus icon / particles
-@functools.lru_cache(maxsize=256)
-def virus_icon(r, color, spikes=10, blur=0, ring=True):
-    s = int(r * 3.2) + 8
-    big = Image.new("RGBA", (s * 2, s * 2), (0, 0, 0, 0))
-    d = ImageDraw.Draw(big)
-    c = s
-    R = r * 2
-    for i in range(spikes):
-        ang = 2 * math.pi * i / spikes
-        x1, y1 = c + math.cos(ang) * R * 1.0, c + math.sin(ang) * R * 1.0
-        x2, y2 = c + math.cos(ang) * R * 1.45, c + math.sin(ang) * R * 1.45
-        d.line([(x1, y1), (x2, y2)], fill=rgba(color, 1), width=max(2, int(R * 0.12)))
-        br = R * 0.16
-        d.ellipse((x2 - br, y2 - br, x2 + br, y2 + br), fill=rgba(color, 1))
-    if ring:
-        d.ellipse((c - R, c - R, c + R, c + R), outline=rgba(color, 1), width=max(2, int(R * 0.14)))
-        d.ellipse((c - R * 0.45, c - R * 0.45, c - R * 0.1, c - R * 0.1), fill=rgba(color, 0.7))
-        d.ellipse((c + R * 0.1, c + R * 0.05, c + R * 0.42, c + R * 0.37), fill=rgba(color, 0.7))
-    else:
-        d.ellipse((c - R, c - R, c + R, c + R), fill=rgba(color, 1))
-    img = big.reduce(2)
-    if blur:
-        img = img.filter(ImageFilter.GaussianBlur(blur))
-    return img
-
-
-@functools.lru_cache(maxsize=None)
-def bokeh_particles():
-    rng = np.random.default_rng(11)
-    out = []
-    for _ in range(16):
-        depth = rng.random()
-        out.append(dict(x=rng.uniform(0, W), y=rng.uniform(0, H), r=int(lerp(10, 34, depth)),
-                        vx=rng.uniform(-18, 18) * (0.4 + depth), vy=rng.uniform(-30, -8) * (0.4 + depth),
-                        rot=rng.uniform(-40, 40), a=lerp(0.10, 0.28, 1 - depth), blur=int(lerp(4, 0, depth) + 0.5)))
-    return out
-
-
-def draw_bokeh(buf, t, alpha=1.0):
-    for p in bokeh_particles():
-        x = (p["x"] + p["vx"] * t) % (W + 200) - 100
-        y = (p["y"] + p["vy"] * t) % (H + 200) - 100
-        icon = virus_icon(p["r"], LIME, 10, p["blur"]).rotate(p["rot"] * t, resample=Image.BICUBIC)
-        comp(buf, icon, p["a"] * alpha, int(x - icon.width / 2), int(y - icon.height / 2))
+    draw_card(buf, t, "ONE DOCTOR", ["TRAVELS", "FASTER."], [WHITE, ACCENT], 1.58, 2.9)
 
 
 # ------------------------------------------------------------------ clip scene
 PX0, PY0, PH = 250, 90, 900
 PW = int(round(PH * 416 / 712))
 COL_X = 880
-HUD_LINES = [("SPECIALTY:", "GERMS, BUGS & SUPERBUGS", 3.70),
-             ("SIDE EFFECT:", "SEVERE WANDERLUST", 4.50),
-             ("PASSPORT:", "RUNNING OUT OF PAGES", 5.30),
-             ("STATUS:", "ABOUT TO GO VIRAL", 6.10)]
+HUD_LINES = [("CALLSIGN:", "BT", 3.70),
+             ("FIELD OF OPS:", "WORLDWIDE", 4.50),
+             ("TARGETS:", "VIRUSES, BACTERIA, PARASITES", 5.30),
+             ("STATUS:", "ACTIVE", 6.10)]
 TYPE_CPS = 1 / 0.018
 
 
@@ -532,8 +480,8 @@ def src_frames():
     out = []
     for f in files:
         im = Image.open(f).convert("RGB")
-        im = ImageEnhance.Contrast(im).enhance(1.08)
-        im = ImageEnhance.Color(im).enhance(1.12)
+        im = ImageEnhance.Contrast(im).enhance(1.15)
+        im = ImageEnhance.Color(im).enhance(0.8)
         out.append(im)
     return out
 
@@ -554,7 +502,7 @@ def round_mask(w, h, r):
 def panel_shadow():
     pad = 80
     sh = Image.new("RGBA", (PW + pad * 2, PH + pad * 2), (0, 0, 0, 0))
-    ImageDraw.Draw(sh).rounded_rectangle((pad, pad + 18, pad + PW, pad + PH + 18), radius=20, fill=(0, 0, 0, 200))
+    ImageDraw.Draw(sh).rounded_rectangle((pad, pad + 18, pad + PW, pad + PH + 18), radius=8, fill=(0, 0, 0, 200))
     return sh.filter(ImageFilter.GaussianBlur(30)), pad
 
 
@@ -564,9 +512,8 @@ def draw_clip_bg(buf, t, img):
     small = band.resize((96, 54), Image.BILINEAR).filter(ImageFilter.GaussianBlur(2.5))
     big = np.asarray(small.resize((W, H), Image.BILINEAR), np.float32)
     lum = big.mean(axis=2, keepdims=True)
-    buf[:] = bg * 0.9 + lum * 0.24 * np.array([0.5, 0.78, 1.0], np.float32)
-    buf += (grid * 9.0)[..., None] * np.array([0.6, 1.0, 0.35], np.float32)
-    draw_bokeh(buf, t, e_out3(prog(t, T_DROP, T_DROP + 0.6)))
+    buf[:] = bg * 0.9 + lum * 0.2 * np.array([0.82, 0.86, 0.92], np.float32)
+    buf += (grid * 6.0)[..., None]
 
 
 def draw_panel(buf, t, img):
@@ -582,7 +529,7 @@ def draw_panel(buf, t, img):
     arr = np.asarray(fr, np.float32).copy()
     arr[::3] *= 0.93
     fr = Image.fromarray(arr.clip(0, 255).astype(np.uint8)).convert("RGBA")
-    fr.putalpha(round_mask(pw, ph, 18))
+    fr.putalpha(round_mask(pw, ph, 6))
     px, py = int(PX0 + PW / 2 - pw / 2), int(PY0 + PH / 2 - ph / 2)
     sh, pad = panel_shadow()
     comp(buf, sh, p_in, PX0 - pad, PY0 - pad)
@@ -590,10 +537,10 @@ def draw_panel(buf, t, img):
 
     L = new_layer()
     d = ImageDraw.Draw(L)
-    d.rounded_rectangle((px, py, px + pw, py + ph), radius=18, outline=rgba(LIME, 0.95), width=3)
-    corner_brackets(d, px - 18, py - 18, px + pw + 18, py + ph + 18, 36, rgba(WHITE, 0.75), 3)
+    d.rounded_rectangle((px, py, px + pw, py + ph), radius=6, outline=rgba(WHITE, 0.8), width=2)
+    corner_brackets(d, px - 18, py - 18, px + pw + 18, py + ph + 18, 36, rgba(ACCENT, 0.95), 4)
     comp(buf, L)
-    glow(buf, L, 14, 1.1)
+    glow(buf, L, 14, 0.25)
 
     O = new_layer()
     od = ImageDraw.Draw(O)
@@ -608,7 +555,7 @@ def draw_panel(buf, t, img):
     od.rounded_rectangle((px + pw - tcw - 36, py + 16, px + pw - 16, py + 54), radius=8, fill=(0, 0, 0, int(120 * a)))
     draw_text(O, tc, "mono", 20, WHITE, px + pw - 26, py + 42, tracking=1, align="r", alpha=a)
     od.rounded_rectangle((px + 16, py + ph - 54, px + 236, py + ph - 16), radius=8, fill=(0, 0, 0, int(120 * a)))
-    draw_text(O, "FIELD CAM // BT-01", "mono", 18, LIME, px + 28, py + ph - 28, tracking=1, alpha=a)
+    draw_text(O, "FIELD CAM // BT-01", "mono", 18, WHITE, px + 28, py + ph - 28, tracking=1, alpha=a)
     comp(buf, O)
 
 
@@ -621,11 +568,11 @@ def draw_column(buf, t):
     if a > 0:
         tag = "SUBJECT IDENTIFIED"
         tw = text_w(tag, "mono", 22, 4)
-        d.rounded_rectangle((x0, 268, x0 + tw + 56, 314), radius=23, outline=rgba(LIME, a), width=2)
+        d.rounded_rectangle((x0, 268, x0 + tw + 56, 314), radius=3, outline=rgba(ACCENT, a), width=2)
         if (t * 3) % 1 < 0.6:
-            d.ellipse((x0 + 17, 284, x0 + 31, 298), fill=rgba(LIME, a))
+            d.ellipse((x0 + 17, 284, x0 + 31, 298), fill=rgba(ACCENT, a))
         k = int(round(len(tag) * prog(t, 3.0, 3.0 + len(tag) * 0.014)))
-        draw_text(L, tag[:k], "mono", 22, LIME, x0 + 42, 299, tracking=4, alpha=a)
+        draw_text(L, tag[:k], "mono", 22, ACCENT, x0 + 42, 299, tracking=4, alpha=a)
     # name
     size = 124
     while words_width(["DR.", "BILL", "TIMM"], "black", size) > 960:
@@ -633,33 +580,33 @@ def draw_column(buf, t):
     reveal_words(L, ["DR.", "BILL", "TIMM"], "black", size, [WHITE] * 3, x0 - 4, 438, t, 3.12, stagger=0.08)
     # role
     p = e_out3(prog(t, 3.4, 3.8))
-    draw_text(L, "INFECTIOUS DISEASE PHYSICIAN", "bold", 40, LIME, x0, 504, tracking=3, alpha=p, dx=-(1 - p) * 40)
+    draw_text(L, "INFECTIOUS DISEASE PHYSICIAN", "bold", 40, ACCENT, x0, 504, tracking=3, alpha=p, dx=-(1 - p) * 40)
     # separator
     p = e_inout(prog(t, 3.5, 4.0))
     if p > 0:
         d.line([(x0, 540), (x0 + 900 * p, 540)], fill=rgba(WHITE, 0.25), width=2)
-        d.line([(x0, 540), (x0 + 140 * p, 540)], fill=rgba(LIME, 1), width=4)
+        d.line([(x0, 540), (x0 + 140 * p, 540)], fill=rgba(ACCENT, 1), width=4)
     # typed HUD lines
     active = None
     for i, (key, val, ts0) in enumerate(HUD_LINES):
         if t < ts0:
             continue
         s = "> " + key + " " + val
-        cols = tuple([LIME] * (len(key) + 3) + [WHITE] * len(val))
+        cols = tuple([ACCENT] * (len(key) + 3) + [WHITE] * len(val))
         k = min(len(s), int((t - ts0) * TYPE_CPS))
         y = 604 + i * 54
-        draw_text(L, s[:k], "mono", 28, cols[:k] if k else LIME, x0, y, tracking=1)
+        draw_text(L, s[:k], "mono", 28, cols[:k] if k else ACCENT, x0, y, tracking=1)
         active = (x0 + text_w(s[:k], "mono", 28, 1) + 6, y)
     if active and (t * 2.5) % 1 < 0.55 and t < 7.0:
-        d.rectangle((active[0], active[1] - 24, active[0] + 15, active[1] + 4), fill=rgba(LIME, 0.9))
+        d.rectangle((active[0], active[1] - 24, active[0] + 15, active[1] + 4), fill=rgba(ACCENT, 0.9))
     # virality meter
     a = e_out3(prog(t, 6.75, 7.0))
     if a > 0:
         p = e_inout(prog(t, 6.9, 8.35))
         crit = p >= 1
         flash = (t * 8) % 1 < 0.5
-        label = "VIRALITY LEVEL: CRITICAL" if crit else "VIRALITY LEVEL"
-        lc = RED if crit and flash else LIME
+        label = "THREAT LEVEL: CRITICAL" if crit else "THREAT LEVEL"
+        lc = WHITE if crit and flash else ACCENT
         draw_text(L, label, "mono", 22, lc, x0, 842, tracking=4, alpha=a)
         draw_text(L, f"{int(p * 100):3d}%", "mono", 24, WHITE, x0 + 900, 842, align="r", alpha=a)
         nseg, gap, bw = 25, 6, 900
@@ -669,14 +616,14 @@ def draw_column(buf, t):
             sx = x0 + j * (sw + gap)
             box = (sx, 860, sx + sw, 892)
             if j < int(filled):
-                col = (RED if flash else LIME) if crit else mixc(LIME, (255, 225, 60), j / nseg)
+                col = (WHITE if flash else ACCENT) if crit else mixc((255, 170, 40), ACCENT, j / nseg)
                 d.rectangle(box, fill=rgba(col, a))
             elif j < filled:
                 d.rectangle(box, fill=rgba(WHITE, a * 0.9))
             else:
                 d.rectangle(box, outline=rgba(WHITE, 0.25 * a), width=2)
     comp(buf, L)
-    glow(buf, L, 10, 0.4)
+    glow(buf, L, 10, 0.1)
 
 
 def render_clip(buf, t):
@@ -687,21 +634,19 @@ def render_clip(buf, t):
 
 
 # ------------------------------------------------------------------ logo scene
-EM_CX, EM_CY, EM_R = W // 2, 338, 116
+EM_CX, EM_CY, EM_R = W // 2, 338, 112
 
 
 @functools.lru_cache(maxsize=None)
 def logo_bg():
     bg, vign, center_dim, glow_r, grain, grid = statics()
     buf = bg.copy()
-    P = dots()
     L = ss_layer()
     d = ImageDraw.Draw(L)
-    z = 1.08
-    for lon, lat in P:
-        x, y = proj(lon, lat, z)
+    for lon, lat in dots():
+        x, y = proj(lon, lat, 1.08)
         rr = 2.1 * 2
-        d.ellipse((x * 2 - rr, y * 2 - rr, x * 2 + rr, y * 2 + rr), fill=rgba(mixc(DOT, LIME, 0.35), 0.38))
+        d.ellipse((x * 2 - rr, y * 2 - rr, x * 2 + rr, y * 2 + rr), fill=rgba(DOT, 0.5))
     comp(buf, L.reduce(2))
     return buf
 
@@ -709,235 +654,129 @@ def logo_bg():
 @functools.lru_cache(maxsize=None)
 def burst():
     rng = np.random.default_rng(5)
-    out = []
-    for _ in range(120):
-        out.append(dict(ang=rng.uniform(0, 2 * math.pi), spd=rng.uniform(300, 1500), size=rng.uniform(2, 7),
-                        col=[LIME, WHITE, CYAN][rng.choice(3, p=[0.6, 0.25, 0.15])], virus=rng.random() < 0.18,
-                        life=rng.uniform(0.7, 1.5), rot=rng.uniform(-200, 200)))
-    return out
+    return [dict(ang=rng.uniform(0, 2 * math.pi), spd=rng.uniform(400, 1600), size=rng.uniform(1.2, 3.2),
+                 col=ACCENT if rng.random() < 0.35 else STEEL, life=rng.uniform(0.5, 1.1))
+            for _ in range(80)]
 
 
-def plane_icon(size):
-    """Top-down airliner silhouette pointing +x, drawn 2x then reduced."""
-    s = size * 2
-    im = Image.new("RGBA", (s * 2, s * 2), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    c = s
-    L = s * 0.9
-    pts = [(c + L, c), (c + L * 0.8, c - L * 0.08), (c + L * 0.15, c - L * 0.1), (c - L * 0.15, c - L * 0.75),
-           (c - L * 0.32, c - L * 0.75), (c - L * 0.12, c - L * 0.1), (c - L * 0.6, c - L * 0.08),
-           (c - L * 0.75, c - L * 0.32), (c - L * 0.86, c - L * 0.32), (c - L * 0.8, c), (c - L * 0.86, c + L * 0.32),
-           (c - L * 0.75, c + L * 0.32), (c - L * 0.6, c + L * 0.08), (c - L * 0.12, c + L * 0.1),
-           (c - L * 0.32, c + L * 0.75), (c - L * 0.15, c + L * 0.75), (c + L * 0.15, c + L * 0.1),
-           (c + L * 0.8, c + L * 0.08)]
-    d.polygon(pts, fill=rgba(WHITE, 1))
-    return im.reduce(2)
-
-
-_PLANE = None
-
-
-def orbit_pos(phi, R):
-    rx, ry, tilt = R + 108, (R + 108) * 0.30, math.radians(-16)
-    x, y = rx * math.cos(phi), ry * math.sin(phi)
-    return (EM_CX + x * math.cos(tilt) - y * math.sin(tilt), EM_CY + x * math.sin(tilt) + y * math.cos(tilt))
-
-
-def draw_orbit(L, t, front):
-    global _PLANE
-    a = e_out3(prog(t, 9.15, 9.5))
-    if a <= 0:
+def draw_burst(buf, t):
+    """Shockwave ring plus spark streaks flying out of the emblem."""
+    dt = t - T_LOGO
+    if dt < 0 or dt > 1.2:
         return
-    if _PLANE is None:
-        _PLANE = plane_icon(30)
+    L = new_layer()
     d = ImageDraw.Draw(L)
-    phi = math.radians(200) + (t - 9.15) * math.radians(150)
-    for k in range(40):
-        p0, p1 = phi - math.radians(110) * (1 - k / 40), phi - math.radians(110) * (1 - (k + 1) / 40)
-        if (math.sin(p0) > 0) != front or k % 2:
+    q = prog(dt, 0, 0.6)
+    if q < 1:
+        r = 60 + 1150 * e_out3(q)
+        d.ellipse((EM_CX - r, EM_CY - r, EM_CX + r, EM_CY + r), outline=rgba(WHITE, 0.6 * (1 - q)),
+                  width=max(1, int(5 * (1 - q))))
+    for p in burst():
+        if dt > p["life"]:
             continue
-        d.line([orbit_pos(p0, EM_R), orbit_pos(p1, EM_R)], fill=rgba(WHITE, a * 0.7 * k / 40), width=3)
-    if (math.sin(phi) > 0) == front:
-        x, y = orbit_pos(phi, EM_R)
-        x2, y2 = orbit_pos(phi + 0.01, EM_R)
-        ang = math.degrees(math.atan2(y2 - y, x2 - x))
-        icon = scale_alpha(_PLANE.rotate(-ang, resample=Image.BICUBIC, expand=True), a)
-        safe_ac(L, icon, int(x - icon.width / 2), int(y - icon.height / 2))
+
+        def pos(tt):
+            dist = 40 + p["spd"] * (1 - math.exp(-3.2 * tt)) / 3.2
+            return EM_CX + math.cos(p["ang"]) * dist, EM_CY + math.sin(p["ang"]) * dist
+
+        a = (1 - dt / p["life"]) ** 1.5
+        d.line([pos(max(0.0, dt - 0.05)), pos(dt)], fill=rgba(p["col"], a), width=max(1, int(p["size"])))
+    comp(buf, L)
+    glow(buf, L, 10, 0.4)
 
 
 def draw_emblem(buf, t):
-    s = e_outback(prog(t, T_LOGO, T_LOGO + 0.42), 1.6)
-    if s <= 0:
+    """Targeting reticle locking onto a wireframe globe (drawn at 2x for anti-aliasing)."""
+    a = e_out3(prog(t, T_LOGO, T_LOGO + 0.25))
+    if a <= 0:
         return
-    R = EM_R * s
+    s = lerp(1.35, 1.0, e_outexpo(prog(t, T_LOGO, T_LOGO + 0.6)))
     box = 360
     E = Image.new("RGBA", (box * 4, box * 4), (0, 0, 0, 0))
     d = ImageDraw.Draw(E)
     c = box * 2
-    R2 = R * 2
-    rot = (t - T_LOGO) * 55
-    d.ellipse((c - R2, c - R2, c + R2, c + R2), fill=(8, 14, 28, 235))
+    R2 = EM_R * s * 2
+    rot = (t - T_LOGO) * 40
+    d.ellipse((c - R2, c - R2, c + R2, c + R2), fill=(9, 10, 12, 235))
     for lat in (-60, -30, 0, 30, 60):
         yy = c - R2 * math.sin(math.radians(lat))
         hw = R2 * math.cos(math.radians(lat))
-        d.line([(c - hw, yy), (c + hw, yy)], fill=rgba(LIME, 0.75 if lat == 0 else 0.5), width=6 if lat == 0 else 4)
+        d.line([(c - hw, yy), (c + hw, yy)], fill=rgba(WHITE, 0.3), width=3)
     for k in range(6):
-        ang = math.radians(rot + k * 30)
-        hw = R2 * abs(math.cos(ang))
+        hw = R2 * abs(math.cos(math.radians(rot + k * 30)))
         if hw < 3:
-            d.line([(c, c - R2), (c, c + R2)], fill=rgba(LIME, 0.5), width=4)
+            d.line([(c, c - R2), (c, c + R2)], fill=rgba(WHITE, 0.3), width=3)
         else:
-            d.ellipse((c - hw, c - R2, c + hw, c + R2), outline=rgba(LIME, 0.5), width=4)
-    d.ellipse((c - R2, c - R2, c + R2, c + R2), outline=rgba(LIME, 1), width=int(16 * s) + 1)
-    spin = rot * 0.35
-    for i in range(12):
-        g = e_outback(prog(t, T_LOGO + 0.08 + i * 0.022, T_LOGO + 0.38 + i * 0.022), 2.2)
-        if g <= 0:
-            continue
-        ang = math.radians(spin + i * 30)
-        Ls = 34 * 2 * g * s
-        x1, y1 = c + math.cos(ang) * (R2 + 6), c + math.sin(ang) * (R2 + 6)
-        x2, y2 = c + math.cos(ang) * (R2 + 6 + Ls), c + math.sin(ang) * (R2 + 6 + Ls)
-        d.line([(x1, y1), (x2, y2)], fill=rgba(LIME, 1), width=int(18 * s) + 1)
-        br = 26 * g * s
-        d.ellipse((x2 - br, y2 - br, x2 + br, y2 + br), fill=rgba(LIME, 1))
-    E = E.reduce(2)
+            d.ellipse((c - hw, c - R2, c + hw, c + R2), outline=rgba(WHITE, 0.3), width=3)
+    d.ellipse((c - R2, c - R2, c + R2, c + R2), outline=rgba(WHITE, 0.95), width=8)
+    # four red arcs sweep around the globe like a lock-on
+    Ro = R2 + 60 * s
+    sweep = e_inout(prog(t, T_LOGO + 0.05, T_LOGO + 0.45))
+    if sweep > 0:
+        for k in range(4):
+            st = k * 90 + 12
+            d.arc((c - Ro, c - Ro, c + Ro, c + Ro), st, st + 66 * sweep, fill=rgba(ACCENT, 1), width=8)
+    # slowly rotating tick ring
+    Rt = Ro + 30 * s
+    for k in range(72):
+        ang = math.radians(k * 5 + rot * 0.25)
+        ln = (22 if k % 6 == 0 else 10) * s
+        d.line([(c + math.cos(ang) * Rt, c + math.sin(ang) * Rt),
+                (c + math.cos(ang) * (Rt + ln), c + math.sin(ang) * (Rt + ln))], fill=rgba(WHITE, 0.4), width=3)
+    # crosshair arms slide in from outside
+    ci = e_outexpo(prog(t, T_LOGO + 0.1, T_LOGO + 0.55))
+    if ci > 0:
+        off = (1 - ci) * 160
+        for k in range(4):
+            ang = math.radians(k * 90)
+            r0, r1 = R2 + 18 * s + off, Rt + 70 * s + off
+            d.line([(c + math.cos(ang) * r0, c + math.sin(ang) * r0),
+                    (c + math.cos(ang) * r1, c + math.sin(ang) * r1)], fill=rgba(ACCENT, ci), width=8)
+    lock = prog(t, T_LOGO + 0.45, T_LOGO + 0.5)
+    if lock > 0:
+        r = 10 * s
+        blink = 1.0 if (t * 2) % 1 < 0.7 else 0.35
+        d.ellipse((c - r, c - r, c + r, c + r), fill=rgba(ACCENT, lock * blink))
     L = new_layer()
-    draw_orbit(L, t, front=False)
+    safe_ac(L, scale_alpha(E.reduce(2), a), EM_CX - box, EM_CY - box)
     comp(buf, L)
-    safe_ac(L := new_layer(), E, EM_CX - box, EM_CY - box)
-    comp(buf, L)
-    glow(buf, L, 26, 1.0)
-    F = new_layer()
-    draw_orbit(F, t, front=True)
-    comp(buf, F)
-    glow(buf, F, 10, 0.6)
-
-
-def draw_burst(buf, t):
-    dt = t - T_LOGO
-    if dt < 0 or dt > 1.6:
-        return
-    L = new_layer()
-    d = ImageDraw.Draw(L)
-    q = prog(dt, 0, 0.7)
-    if q < 1:
-        r = 60 + 1150 * e_out3(q)
-        d.ellipse((EM_CX - r, EM_CY - r, EM_CX + r, EM_CY + r), outline=rgba(LIME, 0.85 * (1 - q)), width=max(1, int(8 * (1 - q))))
-    for p in burst():
-        if dt > p["life"]:
-            continue
-        dist = p["spd"] * (1 - math.exp(-3.2 * dt)) / 3.2
-        x = EM_CX + math.cos(p["ang"]) * (dist + 40)
-        y = EM_CY + math.sin(p["ang"]) * (dist + 40)
-        a = (1 - dt / p["life"]) ** 1.5
-        if p["virus"]:
-            icon = virus_icon(int(p["size"] * 2.2), p["col"], 8).rotate(p["rot"] * dt)
-            safe_ac(L, scale_alpha(icon, a), int(x - icon.width / 2), int(y - icon.height / 2))
-        else:
-            r = p["size"]
-            d.ellipse((x - r, y - r, x + r, y + r), fill=rgba(p["col"], a))
-    comp(buf, L)
-    glow(buf, L, 12, 1.0)
-
-
-def bell_icon(size, color):
-    s = size * 2
-    im = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    c = s / 2
-    d.ellipse((c - s * 0.07, s * 0.14, c + s * 0.07, s * 0.28), fill=color)
-    d.pieslice((c - s * 0.27, s * 0.2, c + s * 0.27, s * 0.74), 180, 360, fill=color)
-    d.polygon([(c - s * 0.27, s * 0.47), (c + s * 0.27, s * 0.47), (c + s * 0.36, s * 0.7), (c - s * 0.36, s * 0.7)], fill=color)
-    d.rounded_rectangle((c - s * 0.38, s * 0.66, c + s * 0.38, s * 0.74), radius=s * 0.03, fill=color)
-    d.ellipse((c - s * 0.09, s * 0.74, c + s * 0.09, s * 0.88), fill=color)
-    return im.reduce(2)
-
-
-def cursor_icon(size=36):
-    s = size * 2
-    im = Image.new("RGBA", (s, int(s * 1.5)), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    pts = [(4, 4), (4, s * 1.18), (s * 0.3, s * 0.92), (s * 0.48, s * 1.36), (s * 0.66, s * 1.28),
-           (s * 0.48, s * 0.85), (s * 0.84, s * 0.85)]
-    d.polygon(pts, fill=(255, 255, 255, 255), outline=(0, 0, 0, 255), width=5)
-    return im.reduce(2)
+    glow(buf, L, 18, 0.3)
 
 
 def draw_subscribe(buf, t):
-    a = clamp01(prog(t, 9.9, 10.1)) * 1.0
+    a = clamp01(prog(t, T_SUB - 0.15, T_SUB))
     if a <= 0:
         return
-    p = e_outback(prog(t, 9.9, 10.32), 1.7)
-    dy = (1 - p) * 70
-    clicked = t >= T_SUB + 0.05
-    press = 1 - 0.07 * math.sin(math.pi * prog(t, T_SUB, T_SUB + 0.16))
-    bw, bh, gap, bell = 352, 84, 18, 84
-    gx = W / 2 - (bw + gap + bell) / 2
-    cy = 918 + dy
-    L = new_layer()
+    p = e_outexpo(prog(t, T_SUB - 0.15, T_SUB + 0.3))
+    bw, bh = 300, 70
     S = Image.new("RGBA", (bw * 2, bh * 2), (0, 0, 0, 0))
-    sd = ImageDraw.Draw(S)
-    sd.rounded_rectangle((0, 0, bw * 2 - 1, bh * 2 - 1), radius=bh, fill=(52, 56, 66, 255) if clicked else rgba(YT_RED))
+    ImageDraw.Draw(S).rounded_rectangle((0, 0, bw * 2 - 1, bh * 2 - 1), radius=10, fill=rgba(YT_RED))
     S = S.reduce(2)
-    label = "SUBSCRIBED" if clicked else "SUBSCRIBE"
-    draw_text(S, label, "xbold", 36, WHITE, bw / 2, bh / 2 + 13, tracking=2, align="c")
-    if press < 0.999:
-        S = S.resize((int(bw * press), int(bh * press)), Image.LANCZOS)
-    safe_ac(L, scale_alpha(S, a), int(gx + bw / 2 - S.width / 2), int(cy - S.height / 2))
-    B = Image.new("RGBA", (bell * 2, bell * 2), (0, 0, 0, 0))
-    ImageDraw.Draw(B).ellipse((0, 0, bell * 2 - 1, bell * 2 - 1), fill=(30, 36, 50, 255))
-    B = B.reduce(2)
-    wig = 0
-    if t > T_SUB + 0.12:
-        u = t - T_SUB - 0.12
-        wig = 24 * math.sin(u * 38) * math.exp(-u * 4.5)
-    bi = bell_icon(52, rgba(LIME if clicked else WHITE)).rotate(wig, resample=Image.BICUBIC, center=(26, 12))
-    safe_ac(B, bi, (bell - bi.width) // 2, (bell - bi.height) // 2)
-    if clicked:
-        bd = ImageDraw.Draw(B)
-        bd.ellipse((bell - 30, 12, bell - 14, 28), fill=rgba(YT_RED))
-    safe_ac(L, scale_alpha(B, a), int(gx + bw + gap), int(cy - bell / 2))
+    draw_text(S, "SUBSCRIBE", "xbold", 30, WHITE, bw / 2, bh / 2 + 11, tracking=5, align="c")
+    L = new_layer()
+    safe_ac(L, scale_alpha(S, a), int(W / 2 - bw / 2), int(905 - bh / 2 + (1 - p) * 50))
     comp(buf, L)
-    if clicked:
-        glow(buf, L, 14, 0.35 * (1 - prog(t, T_SUB, T_SUB + 1.0)) + 0.1)
-    # cursor + click ripple
-    if 10.15 < t < 11.9:
-        target = (gx + bw * 0.62, 930)
-        m = e_inout(prog(t, 10.2, 10.74))
-        out = e_in3(prog(t, 11.35, 11.9))
-        cx = lerp(1560, target[0], m) + out * 520
-        cyc = lerp(1150, target[1], m) + out * 260
-        C = new_layer()
-        q = prog(t, T_SUB, T_SUB + 0.4)
-        if 0 < q < 1:
-            r = 8 + 52 * e_out3(q)
-            ImageDraw.Draw(C).ellipse((cx - r, cyc - r, cx + r, cyc + r), outline=rgba(LIME, 1 - q), width=4)
-        safe_ac(C, cursor_icon(), int(cx - 2), int(cyc - 2))
-        comp(buf, C)
 
 
 def render_logo(buf, t):
     bg, vign, center_dim, glow_r, grain, grid = statics()
     buf[:] = logo_bg()
-    pulse = 0.55 + 0.45 * math.exp(-(t - T_LOGO) * 2.2) + 0.08 * math.sin((t - T_LOGO) * 4)
-    buf += (glow_r * 46 * pulse)[..., None] * np.array([0.55, 1.0, 0.25], np.float32)
+    pulse = 0.5 + 0.5 * math.exp(-(t - T_LOGO) * 2.2)
+    buf += (glow_r * 26 * pulse)[..., None] * np.array([1.0, 0.16, 0.14], np.float32)
     draw_burst(buf, t)
     draw_emblem(buf, t)
-    # title
     T = new_layer()
     words = ["BT", "GOES", "VIRAL"]
     size = 150
     tw = words_width(words, "black", size)
-    reveal_words(T, words, "black", size, [WHITE, WHITE, LIME], W / 2 - tw / 2, 700, t, 9.0, stagger=0.09, dur=0.55)
+    reveal_words(T, words, "black", size, [WHITE, WHITE, ACCENT], W / 2 - tw / 2, 700, t, 9.0, stagger=0.09, dur=0.55)
     comp(buf, T)
-    glow(buf, T, 22, 0.45)
-    # tagline
+    glow(buf, T, 22, 0.12)
     a = prog(t, 9.4, 9.85)
     if a > 0:
         tr = round(lerp(18, 6, e_out3(prog(t, 9.4, 10.15))) * 2) / 2
-        tag = "DR. BILL TIMM  •  INFECTIOUS DISEASE  •  WORLD TRAVEL"
-        cols = tuple(LIME if ch == "•" else WHITE for ch in tag)
+        tag = "DR. BILL TIMM  \u2022  INFECTIOUS DISEASE  \u2022  WORLD TRAVEL"
+        cols = tuple(ACCENT if ch == "\u2022" else WHITE for ch in tag)
         G = new_layer()
         draw_text(G, tag, "semi", 30, cols, W / 2, 792, tracking=tr, align="c", alpha=a * 0.92)
         comp(buf, G)
@@ -957,7 +796,7 @@ def fx_amounts(t):
     chroma = max(10 * pulse_env(t, T_DROP, 0.3, 0.35), 12 * pulse_env(t, T_LOGO, 0.3, 0.35),
                  6 * pulse_env(t, 1.5, 0.06, 0.1), 3 * pulse_env(t, T_SUB, 0.01, 0.2))
     glitch = max(pulse_env(t, T_DROP, 0.08, 0.28), pulse_env(t, T_LOGO, 0.25, 0.22), 0.45 * pulse_env(t, 1.5, 0.05, 0.08))
-    for g0 in (9.72, 10.46, 11.55):
+    for g0 in (10.46,):
         if g0 <= t < g0 + 0.07:
             glitch = max(glitch, 0.35)
     shake = 0.0
